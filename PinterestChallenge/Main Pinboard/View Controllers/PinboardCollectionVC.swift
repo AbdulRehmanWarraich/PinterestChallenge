@@ -28,6 +28,12 @@ class PinboardCollectionVC: UICollectionViewController {
         refreshControl.addTarget(self, action: #selector(pullToRefresh(sender:)), for: .valueChanged)
         self.collectionView.refreshControl = refreshControl
 
+        /* set max number objects which will be cached */
+        CacheManager.shared.updateMaxLimt(30)
+
+        /* set time interval to check and release above limit memory */
+        CacheManager.shared.validateCacheSize(after: 20)
+
         /* calls API to load information */
         getPinboardInfo()
     }

@@ -8,6 +8,6 @@
 import Foundation
 
 struct CacheConfigs {
-    var maxItems: Int = 5
-    var cleanUpPeriod: TimeInterval = 5
+    var maxItems: Int = 20 // number of objects
+    var cleanUpPeriod: TimeInterval = 100 // Value in seconds
 }
