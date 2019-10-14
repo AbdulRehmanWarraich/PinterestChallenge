@@ -1,0 +1,6 @@
+framework module Pods_PinterestChallenge {
+  umbrella header "Pods-PinterestChallenge-umbrella.h"
+
+  export *
+  module * { export * }
+}
