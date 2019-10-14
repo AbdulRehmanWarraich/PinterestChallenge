@@ -11,7 +11,7 @@ class CachedItem {
     private let url: String
     private let item: Data
 
-    private let createdTime: Date
+    private(set) public var createdTime: Date
     private(set) public var requestedTimes: Int = 0
 
     init(url: String, item: Data) {

@@ -8,24 +8,19 @@
 import Foundation
 
 class CacheManager {
-    static let shared = CacheManager(configs: CacheConfigs.default())
-
-    var configs: CacheConfigs
+    static let shared = CacheManager(configs: CacheConfigs())
+    
+    private var configs: CacheConfigs
     private var cached = [String : CachedItem]()
-    var maxItemsCount: Int
-
+    private var timer : Timer?
+    
     init(configs: CacheConfigs) {
-
+        
         self.configs = configs
-        self.maxItemsCount = configs.maxItems
-
-        if configs.cleanUpPeriod != 0 {
-            Timer.scheduledTimer(withTimeInterval: configs.cleanUpPeriod, repeats: true) { (timer) in
-                self.releaseResources()
-            }
-        }
+        
+        startTimer(withTimeInterval: configs.cleanUpPeriod)
     }
-
+    
     func set(url: String, item: Data) {
         var cachedItem = cached[url]
         if cachedItem == nil {
@@ -33,29 +28,41 @@ class CacheManager {
             cached[url] = cachedItem
         }
     }
-
+    
     func getItem(url: String) -> Data? {
         return cached[url]?.getItem()
     }
-
-    func releaseResources() {
-        if cached.count == configs.maxItems {
-
-            var leastRequestedKey: String?
-            var leastRequestedTimes: Int = Int.max
-            for itemKey in cached.keys {
-                if let cacheditem = cached[itemKey] {
-                    if cacheditem.requestedTimes < leastRequestedTimes {
-                        leastRequestedKey = itemKey
-                        leastRequestedTimes = cacheditem.requestedTimes
-                    }
-                }
-            }
-
-            if leastRequestedKey != nil {
-                cached.removeValue(forKey: leastRequestedKey!)
+    
+    func validateCacheSize(after duration:TimeInterval) {
+        configs.cleanUpPeriod = duration
+        
+        startTimer(withTimeInterval: configs.cleanUpPeriod)
+    }
+    
+    func updateMaxLimt(_ limit :Int) {
+        configs.maxItems = limit
+    }
+    
+    private func releaseResources() {
+        if cached.count > configs.maxItems {
+            
+            var sorted = cached.sorted(by: {$0.value.requestedTimes > $1.value.requestedTimes})
+            
+            for i in configs.maxItems..<sorted.count {
+                cached.removeValue(forKey: sorted[i].key)
             }
         }
     }
+    
+    private func startTimer(withTimeInterval timeInterval : TimeInterval) {
+        timer?.invalidate()
+        if configs.cleanUpPeriod > 0 {
+            timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true) { (timer) in
+                print("Clearing function called")
+                self.releaseResources()
+            }
+        }
+    }
+    
 }
 

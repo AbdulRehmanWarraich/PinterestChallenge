@@ -22,7 +22,7 @@ enum HTTPMethod: String {
 class APIClient: NSObject {
 
     static let shared = APIClient()
-    let cacheManager = CacheManager(configs: CacheConfigs.default())
+
     let session = URLSession(configuration: .default)
 
 
@@ -33,7 +33,7 @@ class APIClient: NSObject {
 
         guard let requestURL = URL(string: urlString) else { return }
 
-        if let cachedItemData = cacheManager.getItem(url: requestURL.absoluteString) {
+        if let cachedItemData = CacheManager.shared.getItem(url: requestURL.absoluteString) {
             print("Fetched data from CACHED \(requestURL.absoluteString)")
             completionBlock(true, cachedItemData)
 
@@ -57,7 +57,7 @@ class APIClient: NSObject {
                         response.statusCode == 200 {
 
                         self.showRequestDetailForSuccess(responseObject: response)
-                        self.cacheManager.set(url: requestURL.absoluteString, item: data)
+                        CacheManager.shared.set(url: requestURL.absoluteString, item: data)
                         completionBlock(true, data)
                     } else {
                         if let response = response as? HTTPURLResponse,
@@ -100,8 +100,9 @@ class APIClient: NSObject {
 
         guard let requestURL = URL(string: urlString) else { return }
 
-        if let cachedItemData = cacheManager.getItem(url: requestURL.absoluteString),
+        if let cachedItemData = CacheManager.shared.getItem(url: requestURL.absoluteString),
             let image = UIImage(data: cachedItemData) {
+
             print("Image fetched data from CACHED \(requestURL.absoluteString)")
             completionBlock(true, image)
 
@@ -116,7 +117,7 @@ class APIClient: NSObject {
                         let image = UIImage(data: data) {
 
                         self.showRequestDetailForSuccess(responseObject: response)
-                        self.cacheManager.set(url: requestURL.absoluteString, item: data)
+                        CacheManager.shared.set(url: requestURL.absoluteString, item: data)
                         completionBlock(true, image)
 
                     } else {
