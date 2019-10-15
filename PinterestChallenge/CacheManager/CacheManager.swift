@@ -46,7 +46,7 @@ class CacheManager {
     private func releaseResources() {
         if cached.count > configs.maxItems {
             
-            var sorted = cached.sorted(by: {$0.value.requestedTimes > $1.value.requestedTimes})
+            let sorted = cached.sorted(by: {($0.value.requestedTimes,$0.value.createdTime) > ($1.value.requestedTimes,$1.value.createdTime)})
             
             for i in configs.maxItems..<sorted.count {
                 cached.removeValue(forKey: sorted[i].key)
